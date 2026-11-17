@@ -2,7 +2,11 @@
 
 DeliverUS es un proyecto colaborativo de pedidos de restaurantes.
 
-[Visita visual en GitHub Pages](https://nicodalba.github.io/deliverus/)
+[Abrir app de clientes](https://nicodalba.github.io/deliverus/customer/) · [Abrir app de propietarios](https://nicodalba.github.io/deliverus/owner/)
+
+La publicación es una **demo estática gratuita** de las dos aplicaciones originales. Usa las cuentas de ejemplo de abajo. Los pedidos y las ediciones se guardan sólo en el navegador que uses y se conservan al recargar. Cliente y propietario comparten esa copia local. Usa datos ficticios. «Restaurar demo» recupera el catálogo inicial.
+
+[Construcción y publicación](./DEPLOYMENT.md) · [Presentación del proyecto](https://nicodalba.github.io/deliverus/)
 
 | Carpeta | Aplicación |
 | --- | --- |
@@ -10,7 +14,9 @@ DeliverUS es un proyecto colaborativo de pedidos de restaurantes.
 | `DeliverUS-Frontend-Customer` | Catálogo, filtros, menús, perfil e historial de pedidos del cliente. |
 | `DeliverUS-Frontend-Owner` | Perfil y gestión de restaurantes y productos del propietario. |
 
-## Arranque local
+## Aplicación conectada en local
+
+Para ejecutar Express, MariaDB y las apps conectadas, sigue estos pasos.
 
 Necesitas Node.js 24 LTS con npm y MariaDB en local. Se comprobó con MariaDB 11.4.
 
@@ -70,9 +76,10 @@ Vuelve a sembrar esa base antes de una demostración manual para restaurar los d
 
 ## Límites conocidos
 
-- A un subtotal de exactamente 10 €, el backend aplica el coste de envío al crear un pedido y lo quita al editarlo.
-- El panel de Owner es provisional. Las operaciones de pedidos por restaurante y de analítica están en la API.
-- El sitio de GitHub Pages presenta capturas. Las aplicaciones conectadas requieren el arranque local indicado arriba.
+- El envío es gratuito desde 10 € tanto al crear como al editar pedidos.
+- Las cuentas y perfiles de la demo estática son fijos. Cada perfil del navegador tiene su propio estado.
+- Owner incluye una vista de pedidos por restaurante con preparación, envío y entrega. El panel adicional sigue siendo provisional.
+- La demo pública guarda los cambios en el navegador. La aplicación con base de datos compartida requiere el arranque local indicado arriba.
 
 ## Créditos y licencia
 

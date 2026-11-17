@@ -11,6 +11,7 @@
     "start:frontend:owner": "cd DeliverUS-Frontend-Owner && npx expo start",
     "start:frontend:customer": "cd DeliverUS-Frontend-Customer && npx expo start",
     "install:all:win": "npm run copy:env:win && npm run install:backend && npm run migrate:backend && npm run install:frontend:owner && npm run install:frontend:customer",
-    "install:all:bash": "npm run copy:env:bash && npm run install:backend && npm run migrate:backend && npm run install:frontend:owner && npm run install:frontend:customer"
+    "install:all:bash": "npm run copy:env:bash && npm run install:backend && npm run migrate:backend && npm run install:frontend:owner && npm run install:frontend:customer",
+    "build:demo": "sh scripts/build-static-demo.sh"
   }
 }

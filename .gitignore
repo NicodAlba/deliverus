@@ -135,3 +135,7 @@ PROMPT-PUBLICAR-DELIVERUS.md
 *.sql
 *.sql.gz
 /DeliverUS-Backend/public/restaurants/
+
+# Bundled Expo fonts and navigation images in the static export.
+!/docs/customer/assets/node_modules/
+!/docs/owner/assets/node_modules/

@@ -1,68 +1,46 @@
-# Despliegue de DeliverUS
+# Publicación gratuita
 
-El Dockerfile construye las dos aplicaciones Expo originales con Node 24 y sirve sus exportaciones desde Express. Customer usa `/customer/`, Owner usa `/owner/` y ambas consumen `/api` en el mismo origen HTTPS. React Navigation mantiene la navegación dentro de la aplicación. Una recarga abre su pantalla inicial y recupera la sesión guardada para ese rol. Los recursos inexistentes devuelven 404.
+La publicación usa GitHub Pages desde `main` y `/docs`. Customer y Owner son exportaciones web de las aplicaciones Expo originales. La demo estática se activa al compilar con `EXPO_PUBLIC_STATIC_DEMO=true`.
 
-## Servicios en Railway
+Los datos iniciales están en `demo/catalog.json`. Proceden del catálogo de ejemplo de una instalación limpia del backend. `demo/staticApi.js` adapta las operaciones de las interfaces al almacenamiento del navegador. La sesión de cada rol tiene su propia clave. Ambos roles comparten los datos de la demo en el mismo origen y perfil de navegador.
 
-| Servicio | Origen | Almacenamiento |
-| --- | --- | --- |
-| DeliverUS | Este repositorio, Dockerfile en la raíz | Volumen en `/data`, uploads en `/data/public` |
-| MariaDB | Imagen oficial `mariadb:11.4.10` | Volumen en `/var/lib/mysql` |
+## Reconstruir
 
-Usa una réplica de cada servicio, en la misma región. MariaDB sólo necesita la red privada. El servicio DeliverUS recibe un dominio HTTPS con puerto de destino 3000 y comprueba `/api/health`. Ese endpoint comprueba una conexión real a la base.
-
-El entrypoint prepara los permisos del volumen y ejecuta Node sin privilegios de administrador. Los assets de ejemplo permanecen en la imagen y también sirven como respaldo de las rutas `/public` cuando faltan en el volumen.
-
-En MariaDB configura `MARIADB_DATABASE`, `MARIADB_USER`, `MARIADB_PASSWORD` y `MARIADB_ROOT_PASSWORD`. Genera contraseñas distintas para el usuario de la aplicación y el administrador. El comando de arranque usa la entrada oficial de la imagen.
+Con Node 24 LTS y npm, desde la raíz del repositorio.
 
 ```sh
-docker-entrypoint.sh mariadbd --bind-address=:: --max-connections=40 --innodb-buffer-pool-size=134217728
+sh scripts/build-static-demo.sh
 ```
 
-En DeliverUS configura estas variables en el proveedor.
+El script instala con `npm ci`, exporta cada aplicación y actualiza `docs/customer/`, `docs/owner/` y `docs/demo-assets/`. No requiere MariaDB para compilar. Usa estas variables públicas de compilación.
 
-| Variable | Valor o función |
+| Variable | Valor |
 | --- | --- |
-| `NODE_ENV` | `production` |
-| `PORT` | `3000`, o el puerto asignado por el proveedor |
-| `HOST` | `0.0.0.0` |
-| `DATABASE_HOST` | Dominio privado del servicio MariaDB |
-| `DATABASE_PORT` | `3306` |
-| `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | Referencias a la base y usuario limitado de MariaDB |
-| `UPLOAD_ROOT` | `/data` |
-| `AVATARS_FOLDER` | `public/avatars` |
-| `RESTAURANTS_FOLDER` | `public/restaurants` |
-| `PRODUCTS_FOLDER` | `public/restaurants/products` |
-| `WEB_ROOT` | `/app/web` |
-| `DEMO_MODE` | `true`, activa protección de cuentas compartidas, límites y errores sanitizados |
-| `SEED_DEMO` | `true` en la primera instalación de la demo, `false` tras inicializarla |
-| `ALLOWED_ORIGINS` | Origen HTTPS exacto del servicio, separado por comas si hay más sitios autorizados |
-| `TRUST_PROXY` | `1` para el proxy de Railway |
+| `API_BASE_URL` | `/deliverus` |
+| `EXPO_PUBLIC_STATIC_DEMO` | `true` |
+| `EXPO_PUBLIC_APP_ROOT` | `/deliverus` |
+| `WEB_BASE_PATH` | `/deliverus/customer` o `/deliverus/owner` |
 
-Las contraseñas se configuran en Railway. En los bundles sólo se incorpora `API_BASE_URL=/api`. El Dockerfile genera el `.env` de compilación y usa `WEB_BASE_PATH=/customer` o `/owner`. Babel incorpora esa configuración al exportar. Una URL de API distinta exige reconstruir ambos bundles y actualizar CSP/CORS si cambia el origen.
+Los prefijos se configuran en `app.config.js` y Metro incluye el código compartido de `demo/`. Babel incorpora `API_BASE_URL` al bundle. Si cambias el nombre del repositorio o el prefijo público, actualiza el script y reconstruye ambas apps.
 
-## Migraciones, datos y actualizaciones
+Para comprobar las rutas desde un servidor estático local.
 
-`npm run start:production` verifica MariaDB, ejecuta `db:migrate` hacia adelante y arranca Express. Si no conecta, termina con error. Con `SEED_DEMO=true`, Sequelize registra cada seeder completado en `SequelizeData`. Una base con usuarios y sin esos metadatos se rechaza para evitar sembrarla accidentalmente. La receta de reset local `npm run migrate` queda bloqueada con `NODE_ENV=production`.
+```sh
+preview=$(mktemp -d)
+ln -s "$PWD/docs" "$preview/deliverus"
+python3 -m http.server 8000 --bind 127.0.0.1 --directory "$preview"
+```
 
-Después de la primera instalación, deja `SEED_DEMO=false`. Cada despliegue conserva los volúmenes y ejecuta sólo migraciones pendientes. La demo usa IDs de ejemplo de una base vacía. Para ampliar los datos de una instalación existente, usa una migración específica.
+Abre `http://127.0.0.1:8000/deliverus/`. Prueba ambas apps, recarga y cambia de rol. Los pedidos y las imágenes de prueba deben permanecer en ese perfil del navegador. El botón «Restaurar demo» borra ese estado y recupera el catálogo inicial.
 
-Antes de actualizar, crea una copia consistente de MariaDB con `mariadb-dump --single-transaction` y una copia del volumen de uploads. Usa las herramientas privadas del proveedor y guarda las copias fuera del repositorio. Conserva ambos volúmenes al reiniciar o redesplegar. Restaurar código no revierte migraciones de datos. Comprueba compatibilidad antes de volver a una imagen anterior.
+Publica los archivos exportados mediante un commit revisado. GitHub Pages mantiene las rutas `/deliverus/customer/` y `/deliverus/owner/`. La navegación interna usa React Navigation. Al recargar se abre la pantalla inicial y se recupera la sesión del rol. Los archivos JavaScript e imágenes inexistentes devuelven 404.
 
-Las pruebas E2E y los resets se ejecutan exclusivamente sobre una base local desechable. Para actualizar producción, publica un commit revisado, despliega ese SHA, espera el health check y verifica sesión, pedidos e imágenes. Etiqueta el release después de comprobar el despliegue.
+## Alcance y coste
 
-## Demo pública y límites
+La publicación es un ejemplo interactivo estático. Los pedidos, cambios de catálogo e imágenes añadidas se guardan en el almacenamiento local del navegador. Se conservan al recargar y al actualizar la web mientras se mantengan ese almacenamiento y la versión de su esquema. Otros dispositivos y perfiles tienen su propia copia. Borrar los datos del sitio o usar «Restaurar demo» elimina los cambios locales.
 
-Las cuentas compartidas son `customer1@customer.com` y `owner1@owner.com`, con contraseña `secret`. Sus perfiles y su borrado están bloqueados. Los accesos concurrentes de la misma cuenta comparten su sesión vigente. Se permite registrar clientes y propietarios propios para probar con datos ficticios.
+Las cuentas son fijas y se anuncian dentro de la demo. El registro y la edición de credenciales quedan fuera del modo estático. Las imágenes añadidas se limitan a PNG/JPEG de menos de 2 MB y al espacio disponible del navegador.
 
-Los pedidos son de demostración y no tienen cobro. Usa datos ficticios. El propietario ve pedidos de sus restaurantes y puede avanzar su preparación, envío y entrega. El cliente sólo puede editar o cancelar pedidos pendientes. Un subtotal desde 10 € tiene envío gratuito al crear y editar.
+GitHub Pages sirve archivos estáticos desde el repositorio público, con el plan gratuito de GitHub y sus cuotas. Este despliegue carece de suscripciones de infraestructura, API alojada o base de datos facturada. Si se supera una cuota del proveedor, habrá que reducir el uso o revisar el alojamiento. La API Express y MariaDB se conservan para ejecutar la aplicación conectada en local.
 
-Hay un límite de 180 peticiones de API por IP y minuto, 30 solicitudes de acceso o registro por IP cada 15 minutos, y archivos PNG/JPEG de menos de 2 MB. Los recursos estáticos y el health check quedan fuera del límite general. Las cuentas compartidas permiten modificar el mismo catálogo de ejemplo, por lo que varios visitantes pueden ver cambios de otros visitantes. El panel de control adicional sigue siendo provisional.
-
-## Alojamiento y coste
-
-Se usan dos servicios y dos volúmenes de 500 MB en Railway, ajustados al límite disponible de la cuenta. El consumo se descuenta del crédito o se factura según el plan activo. La prueba inicial ofrece hasta 5 USD durante 30 días. Al agotarla, el plan Free aporta 1 USD mensual. Su continuidad depende del consumo. Railway puede eliminar los volúmenes de Trial 30 días después de expirar sus créditos.
-
-Hobby tiene un mínimo de 5 USD/mes, que incluye 5 USD de consumo. Los recursos adicionales se facturan por uso. No hay garantía de alojamiento gratuito permanente. Las tarifas y el estado de la cuenta deben comprobarse antes de contratar o ampliar el plan.
-
-[Condiciones de la prueba](https://docs.railway.com/pricing/free-trial) · [Tarifas vigentes](https://docs.railway.com/pricing/plans)
+[Condiciones de GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Visita visual a las aplicaciones de DeliverUS para clientes y propietarios de restaurantes.">
-  <title>DeliverUS · Visita visual</title>
+  <meta name="description" content="Demo gratuita de las aplicaciones DeliverUS para clientes y propietarios de restaurantes.">
+  <title>DeliverUS · Demo gratuita</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -12,10 +12,15 @@
     <header>
       <h1>DeliverUS</h1>
       <p>Proyecto colaborativo de pedidos de restaurantes, con una aplicación para clientes y otra para propietarios.</p>
-      <a class="button" href="https://github.com/NicodAlba/deliverus">Ver repositorio</a>
+      <nav aria-label="Aplicaciones">
+        <a class="button" href="./customer/">Abrir app de clientes</a>
+        <a class="button" href="./owner/">Abrir app de propietarios</a>
+        <a href="https://github.com/NicodAlba/deliverus">Ver repositorio</a>
+      </nav>
+      <p class="demo-note">Demo gratuita con datos ficticios. Los pedidos y las ediciones se guardan sólo en este navegador. Puedes cambiar de rol para probar el ciclo completo y restaurar la demo cuando quieras.</p>
     </header>
     <section aria-labelledby="walkthrough">
-      <h2 id="walkthrough">Visita visual</h2>
+      <h2 id="walkthrough">Las aplicaciones</h2>
       <div class="gallery">
         <figure>
           <img src="./assets/customer-catalog.webp" alt="Catálogo de restaurantes en la aplicación Customer">
@@ -36,7 +41,7 @@
       </div>
     </section>
     <footer>
-      <p>GitHub Pages sirve esta visita estática. Para probar las aplicaciones con datos, sigue el <a href="https://github.com/NicodAlba/deliverus#arranque-local">arranque local del README</a> y ejecuta Express y MariaDB en tu equipo.</p>
+      <p>Las aplicaciones públicas funcionan como ejemplo estático en GitHub Pages. Para ejecutar el proyecto con Express y MariaDB, consulta el <a href="https://github.com/NicodAlba/deliverus#aplicación-conectada-en-local">README</a>. <a href="./third-party-notices.txt">Avisos de terceros</a>.</p>
     </footer>
   </main>
 </body>
