@@ -311,7 +311,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
               <TextError key={index}>{error.param ? `${error.param}: ${error.msg}` : error.msg}</TextError>
             ))}
             <TextSemiBold textStyle={styles.totalPriceText}>
-              Total Price: {(calculateTotalPrice() + restaurant.shippingCosts).toFixed(2)} €
+              Total Price: {(calculateTotalPrice() + (calculateTotalPrice() >= 10 ? 0 : restaurant.shippingCosts)).toFixed(2)} €
             </TextSemiBold>
             <TextRegular textStyle={styles.shippingCostsText}>
               Shipping Costs: {calculateTotalPrice() >= 10 ? 'Free' : `${restaurant.shippingCosts?.toFixed(2)} €`}

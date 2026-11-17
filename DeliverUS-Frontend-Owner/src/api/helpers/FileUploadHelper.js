@@ -64,7 +64,7 @@ function constructFormData (files, dataWithoutFiles) {
 function getMultiPartHeader () {
   return {
     headers: {
-      'Content-Type': 'multipart/form-data; charset=utf-8; boundary="separation between parts";'
+      ...(getPlatform() === 'web' ? {} : { 'Content-Type': 'multipart/form-data' })
     }
   }
 }

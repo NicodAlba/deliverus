@@ -14,6 +14,8 @@ import { AuthorizationContext } from '../context/AuthorizationContext'
 import { AppContext } from '../context/AppContext'
 import { ApiError } from '../api/helpers/Errors'
 
+import DemoHeader from '../components/DemoHeader'
+
 const Tab = createBottomTabNavigator()
 
 export default function Layout() {
@@ -51,7 +53,8 @@ export default function Layout() {
       {fontsLoaded &&
         <NavigationContainer theme={GlobalStyles.navigationTheme}>
 
-          <Tab.Navigator
+          <DemoHeader />
+      <Tab.Navigator
             screenOptions={({ route }) => ({
               tabBarIcon: ({ color, size }) => {
                 let iconName

@@ -155,6 +155,9 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <Pressable accessibilityRole='button' style={styles.button} onPress={() => navigation.navigate('RestaurantOrdersScreen', { id: restaurant.id })}>
+        <TextRegular>Ver pedidos del restaurante</TextRegular>
+      </Pressable>
       <FlatList
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmptyProductsList}

@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React from 'react'
+import RestaurantOrdersScreen from './RestaurantOrdersScreen'
 import CreateProductScreen from './CreateProductScreen'
 import CreateRestaurantScreen from './CreateRestaurantScreen'
 import EditProductScreen from './EditProductScreen'
@@ -48,6 +49,7 @@ export default function RestaurantsStack () {
         options={{
           title: 'Edit Product'
         }} />
+      <Stack.Screen name='RestaurantOrdersScreen' component={RestaurantOrdersScreen} options={{ title: 'Pedidos del restaurante' }} />
     </Stack.Navigator>
   )
 }

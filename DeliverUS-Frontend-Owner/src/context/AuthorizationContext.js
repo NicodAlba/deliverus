@@ -15,11 +15,12 @@ const AuthorizationContextProvider = props => {
 
   const signOut = (onSuccess = null, onError = null) => {
     try {
+      delete axios.defaults.headers.common.Authorization
       setLoggedInUser(null)
       if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        SecureStore.deleteItemAsync('user')
+        SecureStore.deleteItemAsync('deliverus-owner-user')
       } else {
-        AsyncStorage.removeItem('user')
+        AsyncStorage.removeItem('deliverus-owner-user')
       }
       if (onSuccess) { onSuccess() }
     } catch (err) {
@@ -32,9 +33,9 @@ const AuthorizationContextProvider = props => {
       axios.defaults.headers.common = { Authorization: `bearer ${registeredUser.token}` }
       setLoggedInUser(registeredUser)
       if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        SecureStore.setItemAsync('user', JSON.stringify(registeredUser))
+        SecureStore.setItemAsync('deliverus-owner-user', JSON.stringify(registeredUser))
       } else {
-        AsyncStorage.setItem('user', JSON.stringify(registeredUser))
+        AsyncStorage.setItem('deliverus-owner-user', JSON.stringify(registeredUser))
       }
       if (onSuccess) { onSuccess(registeredUser) }
     } catch (error) {
@@ -47,9 +48,9 @@ const AuthorizationContextProvider = props => {
       const updatedUser = await update(data)
       setLoggedInUser(updatedUser)
       if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        SecureStore.setItemAsync('user', JSON.stringify(updatedUser))
+        SecureStore.setItemAsync('deliverus-owner-user', JSON.stringify(updatedUser))
       } else {
-        AsyncStorage.setItem('user', JSON.stringify(updatedUser))
+        AsyncStorage.setItem('deliverus-owner-user', JSON.stringify(updatedUser))
       }
       if (onSuccess) { onSuccess(updatedUser) }
     } catch (error) {
@@ -63,9 +64,9 @@ const AuthorizationContextProvider = props => {
       axios.defaults.headers.common = { Authorization: `bearer ${loggedInUser.token}` }
       setLoggedInUser(loggedInUser)
       if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        SecureStore.setItemAsync('user', JSON.stringify(loggedInUser))
+        SecureStore.setItemAsync('deliverus-owner-user', JSON.stringify(loggedInUser))
       } else {
-        AsyncStorage.setItem('user', JSON.stringify(loggedInUser))
+        AsyncStorage.setItem('deliverus-owner-user', JSON.stringify(loggedInUser))
       }
       if (onSuccess) {
         onSuccess(loggedInUser)
@@ -79,9 +80,9 @@ const AuthorizationContextProvider = props => {
     try {
       let user
       if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        user = await SecureStore.getItemAsync('user')
+        user = await SecureStore.getItemAsync('deliverus-owner-user')
       } else {
-        user = await AsyncStorage.getItem('user')
+        user = await AsyncStorage.getItem('deliverus-owner-user')
       }
       if (user) {
         try {
