@@ -242,8 +242,8 @@ describe('Popular products', () => {
     const orderData2 = { ...popularOrderData }
     orderData2.restaurantId = createdRestaurant2.id
     orderData2.products = [{ productId: createdPopularProducts[2].id, quantity: 110000 }, { productId: createdPopularProducts[3].id, quantity: 90000 }]
-    await createOrder(customer, createdRestaurant, orderData1)
-    await createOrder(customer2, createdRestaurant2, orderData2)
+    await createOrder(customer, createdRestaurant, orderData1, owner)
+    await createOrder(customer2, createdRestaurant2, orderData2, owner2)
   })
   it('Should return three products corresponding to the previously created', async () => {
     const response = await request(await getApp()).get('/products/popular').send()

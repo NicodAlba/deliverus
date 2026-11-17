@@ -37,7 +37,7 @@ const indexOwner = async function (req, res) {
 }
 
 const create = async function (req, res) {
-  const newRestaurant = Restaurant.build(req.body)
+  const newRestaurant = Restaurant.build(req.body, { fields: ['name', 'description', 'address', 'postalCode', 'url', 'shippingCosts', 'email', 'phone', 'status', 'restaurantCategoryId', 'logo', 'heroImage', 'userId'] })
   newRestaurant.userId = req.user.id // usuario actualmente autenticado
   try {
     const restaurant = await newRestaurant.save()
@@ -72,7 +72,7 @@ const show = async function (req, res) {
 
 const update = async function (req, res) {
   try {
-    await Restaurant.update(req.body, { where: { id: req.params.restaurantId } })
+    await Restaurant.update(req.body, { where: { id: req.params.restaurantId }, fields: ['name', 'description', 'address', 'postalCode', 'url', 'shippingCosts', 'email', 'phone', 'status', 'restaurantCategoryId', 'logo', 'heroImage'] })
     const updatedRestaurant = await Restaurant.findByPk(req.params.restaurantId)
     res.json(updatedRestaurant)
   } catch (err) {

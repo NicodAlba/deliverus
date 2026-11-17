@@ -127,7 +127,7 @@ const create = async (req, res) => {
     }
 
     newOrder.price = totalPrice
-    if (newOrder.price <= 10) {
+    if (newOrder.price < 10) {
       const restaurant = await Restaurant.findByPk(req.body.restaurantId)
       newOrder.shippingCosts = restaurant.shippingCosts
     } else {
@@ -138,9 +138,9 @@ const create = async (req, res) => {
     newOrder.userId = req.user.id
     newOrder.address = req.body.address
     newOrder.restaurantId = req.body.restaurantId
-    newOrder.sentAt = req.body.sentAt
-    newOrder.startedAt = req.body.startedAt
-    newOrder.deliveredAt = req.body.deliveredAt
+    newOrder.sentAt = null
+    newOrder.startedAt = null
+    newOrder.deliveredAt = null
 
     const order = await newOrder.save({ include: 'products', transaction })
     for (const p of req.body.products) {
@@ -163,9 +163,13 @@ const create = async (req, res) => {
 // 3. In order to save the updated order and updated products, start a transaction, update the order, remove the old related OrderProducts and store the new product lines, and commit the transaction
 // 4. If an exception is raised, catch it and rollback the transaction
 const update = async function (req, res) {
-  const originalOrder = await Order.findByPk(req.params.orderId)
   const transaction = await sequelizeSession.transaction()
   try {
+    const originalOrder = await Order.findByPk(req.params.orderId, { transaction, lock: transaction.LOCK.UPDATE })
+    if (!originalOrder || originalOrder.startedAt || originalOrder.sentAt || originalOrder.deliveredAt) {
+      await transaction.rollback()
+      return res.status(409).json({ errors: [{ msg: 'The order is no longer pending.' }] })
+    }
     let price = 0
     for (const product of req.body.products) {
       const productDB = await Product.findByPk(product.productId)
@@ -183,10 +187,10 @@ const update = async function (req, res) {
 
     await Order.update(
       req.body,
-      { where: { id: originalOrder.id }, transaction }
+      { where: { id: originalOrder.id }, fields: ['address', 'price', 'shippingCosts', 'updatedAt'], transaction }
     )
     let finalOrder = await Order.findByPk(req.params.orderId, { include: 'products' })
-    await finalOrder.setProducts([], transaction)
+    await finalOrder.setProducts([], { transaction })
     for (const product of req.body.products) {
       const productDB = await Product.findByPk(product.productId)
       await finalOrder.addProduct(productDB, { through: { quantity: product.quantity, unityPrice: productDB.price }, transaction })
@@ -208,7 +212,7 @@ const destroy = async function (req, res) {
     const order = await Order.findByPk(req.params.orderId)
     let result = 0
     if (!(order.startedAt || order.deliveredAt || order.sentAt)) {
-      result = await Order.destroy({ where: { id: req.params.orderId } })
+      result = await Order.destroy({ where: { id: req.params.orderId, startedAt: null, sentAt: null, deliveredAt: null } })
     }
     let message = ''
     if (result === 1) {
@@ -225,9 +229,9 @@ const destroy = async function (req, res) {
 
 const confirm = async function (req, res) {
   try {
-    const order = await Order.findByPk(req.params.orderId)
-    order.startedAt = new Date()
-    const updatedOrder = await order.save()
+    const [changed] = await Order.update({ startedAt: new Date() }, { where: { id: req.params.orderId, startedAt: null, sentAt: null, deliveredAt: null } })
+    if (!changed) return res.status(409).json({ errors: [{ msg: 'The order status has changed.' }] })
+    const updatedOrder = await Order.findByPk(req.params.orderId)
     res.json(updatedOrder)
   } catch (err) {
     res.status(500).send(err)
@@ -236,9 +240,9 @@ const confirm = async function (req, res) {
 
 const send = async function (req, res) {
   try {
-    const order = await Order.findByPk(req.params.orderId)
-    order.sentAt = new Date()
-    const updatedOrder = await order.save()
+    const [changed] = await Order.update({ sentAt: new Date() }, { where: { id: req.params.orderId, startedAt: { [Op.ne]: null }, sentAt: null, deliveredAt: null } })
+    if (!changed) return res.status(409).json({ errors: [{ msg: 'The order status has changed.' }] })
+    const updatedOrder = await Order.findByPk(req.params.orderId)
     res.json(updatedOrder)
   } catch (err) {
     res.status(500).send(err)
@@ -247,12 +251,12 @@ const send = async function (req, res) {
 
 const deliver = async function (req, res) {
   try {
-    const order = await Order.findByPk(req.params.orderId)
-    order.deliveredAt = new Date()
-    const updatedOrder = await order.save()
-    const restaurant = await Restaurant.findByPk(order.restaurantId)
+    const [changed] = await Order.update({ deliveredAt: new Date() }, { where: { id: req.params.orderId, sentAt: { [Op.ne]: null }, deliveredAt: null } })
+    if (!changed) return res.status(409).json({ errors: [{ msg: 'The order status has changed.' }] })
+    const updatedOrder = await Order.findByPk(req.params.orderId)
+    const restaurant = await Restaurant.findByPk(updatedOrder.restaurantId)
     const averageServiceTime = await restaurant.getAverageServiceTime()
-    await Restaurant.update({ averageServiceMinutes: averageServiceTime }, { where: { id: order.restaurantId } })
+    await Restaurant.update({ averageServiceMinutes: averageServiceTime }, { where: { id: updatedOrder.restaurantId } })
     res.json(updatedOrder)
   } catch (err) {
     res.status(500).send(err)

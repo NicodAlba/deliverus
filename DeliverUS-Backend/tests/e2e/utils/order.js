@@ -53,11 +53,21 @@ const getProductAlreadyOrdered = async (owner, restaurant) => {
   return orders[0].products[0]
 }
 
-const createOrder = async (customer, restaurant, orderData) => {
-  const owner = await getLoggedInOwner()
+const createOrder = async (customer, restaurant, orderData, owner = null) => {
+  if (!owner) owner = await getLoggedInOwner()
   if (!restaurant) { restaurant = await getFirstRestaurantOfOwner(owner) }
   if (!orderData) { orderData = await getNewOrderData(restaurant) }
-  const response = await request(await getApp()).post('/orders').set('Authorization', `Bearer ${customer.token}`).send(orderData)
+  const { startedAt, sentAt, deliveredAt, ...pendingData } = orderData
+  const app = await getApp()
+  let response = await request(app).post('/orders').set('Authorization', `Bearer ${customer.token}`).send(pendingData)
+  expect(response.status).toBe(200)
+  // Create fixtures through the same owner transitions available in the public API.
+  for (const [requested, action] of [[startedAt || sentAt || deliveredAt, 'confirm'], [sentAt || deliveredAt, 'send'], [deliveredAt, 'deliver']]) {
+    if (requested) {
+      response = await request(app).patch(`/orders/${response.body.id}/${action}`).set('Authorization', `Bearer ${owner.token}`).send()
+      expect(response.status).toBe(200)
+    }
+  }
   return response.body
 }
 

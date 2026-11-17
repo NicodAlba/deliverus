@@ -37,7 +37,7 @@ const show = async function (req, res) {
 }
 
 const create = async function (req, res) {
-  let newProduct = Product.build(req.body)
+  let newProduct = Product.build(req.body, { fields: ['name', 'description', 'price', 'order', 'availability', 'productCategoryId', 'restaurantId', 'image'] })
   try {
     newProduct = await newProduct.save()
     res.json(newProduct)
@@ -48,7 +48,7 @@ const create = async function (req, res) {
 
 const update = async function (req, res) {
   try {
-    await Product.update(req.body, { where: { id: req.params.productId } })
+    await Product.update(req.body, { where: { id: req.params.productId }, fields: ['name', 'description', 'price', 'order', 'availability', 'productCategoryId', 'image'] })
     const updatedProduct = await Product.findByPk(req.params.productId)
     res.json(updatedProduct)
   } catch (err) {

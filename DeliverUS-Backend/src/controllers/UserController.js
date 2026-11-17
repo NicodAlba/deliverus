@@ -21,7 +21,7 @@ const registerOwner = async (req, res) => {
 }
 
 const findByToken = async (token) => {
-  const foundUser = await User.findOne({ where: { token } }, { attributes: { exclude: ['password'] } })
+  const foundUser = await User.findOne({ where: { token }, attributes: { exclude: ['password'] } })
   if (!foundUser) {
     throw new Error('Token not valid')
   }
@@ -62,7 +62,13 @@ const show = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    await User.update(req.body, { where: { id: req.user.id } })
+    if (process.env.DEMO_MODE === 'true' && ['customer1@customer.com', 'owner1@owner.com'].includes(req.user.email)) {
+      return res.status(403).json({ errors: [{ msg: 'The shared demo profile is read-only. Register your own test account.' }] })
+    }
+    await User.update(req.body, {
+      where: { id: req.user.id },
+      fields: ['firstName', 'lastName', 'phone', 'address', 'postalCode', 'avatar']
+    })
     const user = await User.findByPk(req.user.id, { attributes: { exclude: ['password'] } })// update method does not return updated row(s)
     res.json(user)
   } catch (err) {
@@ -72,6 +78,9 @@ const update = async (req, res) => {
 
 const destroy = async (req, res) => {
   try {
+    if (process.env.DEMO_MODE === 'true' && ['customer1@customer.com', 'owner1@owner.com'].includes(req.user.email)) {
+      return res.status(403).json({ errors: [{ msg: 'The shared demo account cannot be deleted.' }] })
+    }
     const result = await User.destroy({ where: { id: req.user.id } })
     let message = ''
     if (result === 1) {
@@ -88,7 +97,7 @@ const destroy = async (req, res) => {
 const _register = async (req, res, userType) => {
   try {
     req.body.userType = userType
-    const newUser = new User(req.body)
+    const newUser = new User(req.body, { fields: ['firstName', 'lastName', 'email', 'password', 'phone', 'address', 'postalCode', 'avatar', 'userType'] })
     const registeredUser = await newUser.save()
     const updatedUser = await _updateToken(registeredUser.id, _createUserTokenDTO())
     res.json(updatedUser)
@@ -120,10 +129,13 @@ const _login = async function (req, res, userType) {
   }
 }
 
-const _updateToken = async (id, tokenDTO, ...args) => {
+const _updateToken = async (id, tokenDTO) => {
   const entity = await User.findByPk(id, {
     attributes: { exclude: ['password'] }
   })
+  if (process.env.DEMO_MODE === 'true' &&
+      ['customer1@customer.com', 'owner1@owner.com'].includes(entity.email) &&
+      entity.token && entity.tokenExpiration > new Date()) return entity
   entity.set(tokenDTO)
   return entity.save()
 }

@@ -592,3 +592,49 @@ describe('Deliver order', () => {
     await shutdownApp()
   })
 })
+
+describe('Shipping threshold consistency', () => {
+  afterAll(shutdownApp)
+  it('Creates and edits a 10 euro order with free shipping', async () => {
+    const customer = await getLoggedInCustomer()
+    const owner = await getLoggedInOwner()
+    const restaurant = await getFirstRestaurantOfOwner(owner)
+    const product = await createProduct(owner, restaurant, {
+      name: 'Threshold product', description: 'Demo boundary case',
+      price: 10, availability: true, restaurantId: restaurant.id, productCategoryId: 1
+    })
+    const app = await getApp()
+    const data = { address: 'Fictional test address', products: [{ productId: product.id, quantity: 1 }] }
+    const created = await request(app).post('/orders')
+      .set('Authorization', `Bearer ${customer.token}`).send({ ...data, restaurantId: restaurant.id })
+    expect(created.status).toBe(200)
+    expect(created.body.shippingCosts).toBe(0)
+    expect(created.body.price).toBe(10)
+    const updated = await request(app).put(`/orders/${created.body.id}`)
+      .set('Authorization', `Bearer ${customer.token}`).send(data)
+    expect(updated.status).toBe(200)
+    expect(updated.body.shippingCosts).toBe(0)
+    expect(updated.body.price).toBe(10)
+  })
+})
+
+describe('Customer cannot set owner order timestamps', () => {
+  afterAll(shutdownApp)
+  it('Creates a pending order when a customer supplies preparation and delivery timestamps', async () => {
+    const customer = await getLoggedInCustomer()
+    const owner = await getLoggedInOwner()
+    const restaurant = await getFirstRestaurantOfOwner(owner)
+    const data = await getNewOrderData(restaurant)
+    const response = await request(await getApp()).post('/orders')
+      .set('Authorization', `Bearer ${customer.token}`)
+      .send({ ...data, startedAt: new Date(), sentAt: new Date(), deliveredAt: new Date() })
+    expect(response.status).toBe(200)
+    const detail = await request(await getApp()).get(`/orders/${response.body.id}`)
+      .set('Authorization', `Bearer ${customer.token}`)
+    expect(detail.status).toBe(200)
+    expect(detail.body.status).toBe('pending')
+    expect(response.body.startedAt).toBeNull()
+    expect(response.body.sentAt).toBeNull()
+    expect(response.body.deliveredAt).toBeNull()
+  })
+})
