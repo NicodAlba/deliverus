@@ -1,3 +1,4 @@
+import { View } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -52,6 +53,7 @@ export default function Layout() {
     <>
       {fontsLoaded &&
         <NavigationContainer theme={GlobalStyles.navigationTheme}>
+          <View style={{ flex: 1, width: '100%', minWidth: 0 }}>
 
           <DemoHeader />
       <Tab.Navigator
@@ -124,6 +126,7 @@ export default function Layout() {
           </Tab.Navigator>
           <FlashMessage position="top" />
 
+        </View>
         </NavigationContainer>
       }
     </>

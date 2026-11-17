@@ -4,7 +4,7 @@ import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemibold'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from '../../api/helpers/ImageUrl'
 import { getDetail, remove } from '../../api/OrderEndpoints'
 import { showMessage } from 'react-native-flash-message'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
@@ -67,7 +67,7 @@ export default function OrderDetailScreen({ navigation, route }) {
       <View style={styles.productContainer}>
         <Image
           style={styles.productImage}
-          source={item.image ? { uri: API_BASE_URL + '/' + item.image, cache: 'force-cache' } : undefined}
+          source={item.image ? { uri: getImageUrl(item.image), cache: 'force-cache' } : undefined}
         />
         <View style={styles.productDetails}>
           <View>
@@ -110,7 +110,7 @@ export default function OrderDetailScreen({ navigation, route }) {
           <Image
             style={styles.restaurantLogo}
             source={order.restaurant?.logo
-              ? { uri: API_BASE_URL + '/' + order.restaurant.logo }
+              ? { uri: getImageUrl(order.restaurant.logo) }
               : restaurantLogo
             }
           />

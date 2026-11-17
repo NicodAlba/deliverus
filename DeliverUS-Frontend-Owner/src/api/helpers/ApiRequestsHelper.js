@@ -1,9 +1,11 @@
 import axios from 'axios'
+import staticApi from '../../../../demo/staticApi'
 import { handleError } from './Errors'
 import { prepareData } from './FileUploadHelper'
 import { API_BASE_URL } from '@env'
 
 axios.defaults.baseURL = API_BASE_URL
+if (process.env.EXPO_PUBLIC_STATIC_DEMO === 'true') axios.defaults.adapter = staticApi
 
 const get = route => {
   return new Promise(function (resolve, reject) {

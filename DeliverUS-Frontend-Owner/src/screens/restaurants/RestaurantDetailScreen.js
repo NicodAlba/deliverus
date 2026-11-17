@@ -11,7 +11,7 @@ import TextSemiBold from '../../components/TextSemibold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import DeleteModal from '../../components/DeleteModal'
 import defaultProductImage from '../../../assets/product.jpeg'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from '../../api/helpers/ImageUrl'
 
 export default function RestaurantDetailScreen ({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
@@ -24,10 +24,10 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
   const renderHeader = () => {
     return (
       <View>
-        <ImageBackground source={(restaurant?.heroImage) ? { uri: API_BASE_URL + '/' + restaurant.heroImage, cache: 'force-cache' } : undefined} style={styles.imageBackground}>
+        <ImageBackground source={(restaurant?.heroImage) ? { uri: getImageUrl(restaurant.heroImage), cache: 'force-cache' } : undefined} style={styles.imageBackground}>
           <View style={styles.restaurantHeaderContainer}>
             <TextSemiBold textStyle={styles.textTitle}>{restaurant.name}</TextSemiBold>
-            <Image style={styles.image} source={restaurant.logo ? { uri: API_BASE_URL + '/' + restaurant.logo, cache: 'force-cache' } : undefined} />
+            <Image style={styles.image} source={restaurant.logo ? { uri: getImageUrl(restaurant.logo), cache: 'force-cache' } : undefined} />
             <TextRegular textStyle={styles.description}>{restaurant.description}</TextRegular>
             <TextRegular textStyle={styles.description}>{restaurant.restaurantCategory ? restaurant.restaurantCategory.name : ''}</TextRegular>
           </View>
@@ -58,7 +58,7 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
   const renderProduct = ({ item }) => {
     return (
       <ImageCard
-        imageUri={item.image ? { uri: API_BASE_URL + '/' + item.image } : defaultProductImage}
+        imageUri={item.image ? { uri: getImageUrl(item.image) } : defaultProductImage}
         title={item.name}
       >
         <TextRegular numberOfLines={2}>{item.description}</TextRegular>

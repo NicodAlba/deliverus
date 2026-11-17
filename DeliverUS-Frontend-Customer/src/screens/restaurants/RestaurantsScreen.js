@@ -8,7 +8,7 @@ import { getAllRestaurants, getRestaurantCategories } from '../../api/Restaurant
 import { getPopularProducts } from '../../api/ProductEndpoints'
 import { showMessage } from 'react-native-flash-message'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from '../../api/helpers/ImageUrl'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import productDefaultImage from '../../../assets/product.jpeg'
 
@@ -73,7 +73,7 @@ export default function RestaurantsScreen({ navigation, route }) {
       >
         <Image
           style={styles.restaurantImage}
-          source={item.logo ? { uri: API_BASE_URL + '/' + item.logo } : restaurantLogo}
+          source={item.logo ? { uri: getImageUrl(item.logo) } : restaurantLogo}
         />
         <View style={styles.restaurantDetailsContainer}>
           <TextSemiBold style={styles.restaurantName}>{item.name}</TextSemiBold>
@@ -161,7 +161,7 @@ export default function RestaurantsScreen({ navigation, route }) {
       >
         <Image
           style={styles.popularProductImage}
-          source={item.image ? { uri: API_BASE_URL + '/' + item.image } : productDefaultImage}
+          source={item.image ? { uri: getImageUrl(item.image) } : productDefaultImage}
         />
         <View style={styles.popularProductDetails}>
           <TextSemiBold numberOfLines={1} style={styles.popularProductName}>{item.name}</TextSemiBold>

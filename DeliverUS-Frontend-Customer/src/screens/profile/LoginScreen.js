@@ -91,6 +91,7 @@ export default function LoginScreen ({ navigation }) {
               </TextRegular>
             </Pressable>
 
+            {process.env.EXPO_PUBLIC_STATIC_DEMO !== 'true' && <>
             <TextRegular textStyle={{ textAlign: 'center' }}>Not a member?</TextRegular>
             <Pressable
               onPress={() => navigation.navigate('RegisterScreen')
@@ -107,6 +108,7 @@ export default function LoginScreen ({ navigation }) {
                 Create account
               </TextRegular>
             </Pressable>
+            </>}
           </View>
         </View>
       )}

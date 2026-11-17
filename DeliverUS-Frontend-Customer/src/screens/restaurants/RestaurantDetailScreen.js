@@ -6,7 +6,7 @@ import { create } from '../../api/OrderEndpoints'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemibold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from '../../api/helpers/ImageUrl'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import ConfirmModal from '../../components/ConfirmModal'
 import * as yup from 'yup'
@@ -78,8 +78,8 @@ export default function RestaurantDetailScreen({ navigation, route }) {
   }, [products])
 
   const renderHeader = () => {
-    const heroImageSource = restaurant?.heroImage ? { uri: API_BASE_URL + '/' + restaurant.heroImage, cache: 'force-cache' } : undefined
-    const logoImageSource = restaurant?.logo ? { uri: API_BASE_URL + '/' + restaurant.logo, cache: 'force-cache' } : undefined
+    const heroImageSource = restaurant?.heroImage ? { uri: getImageUrl(restaurant.heroImage), cache: 'force-cache' } : undefined
+    const logoImageSource = restaurant?.logo ? { uri: getImageUrl(restaurant.logo), cache: 'force-cache' } : undefined
     const fallbackImageSource = logoImageSource
     const imageSource = heroImageSource || fallbackImageSource
     const shouldBlur = !heroImageSource && fallbackImageSource
@@ -100,7 +100,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
 
         <View style={styles.contentContainer}>
           <View style={styles.profileImageContainer}>
-            <Image style={styles.profileImage} source={restaurant.logo ? { uri: API_BASE_URL + '/' + restaurant.logo, cache: 'force-cache' } : undefined} />
+            <Image style={styles.profileImage} source={restaurant.logo ? { uri: getImageUrl(restaurant.logo), cache: 'force-cache' } : undefined} />
             <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(restaurant.status) }]} />
           </View>
 
@@ -206,7 +206,7 @@ export default function RestaurantDetailScreen({ navigation, route }) {
     const quantity = products[item.id] || 0
     return (
       <View style={styles.productContainer}>
-        <Image style={styles.productImage} source={item.image ? { uri: API_BASE_URL + '/' + item.image, cache: 'force-cache' } : undefined} />
+        <Image style={styles.productImage} source={item.image ? { uri: getImageUrl(item.image), cache: 'force-cache' } : undefined} />
         <View style={styles.productDetails}>
           <TextSemiBold style={styles.productName}>{item.name}</TextSemiBold>
           <TextRegular style={styles.productPrice}>{item.price.toFixed(2)} €</TextRegular>

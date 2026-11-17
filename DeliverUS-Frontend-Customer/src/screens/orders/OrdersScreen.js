@@ -6,7 +6,7 @@ import * as GlobalStyles from '../../styles/GlobalStyles'
 import { getAll, remove } from '../../api/OrderEndpoints'
 import { showMessage } from 'react-native-flash-message'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from '../../api/helpers/ImageUrl'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import DeleteModal from '../../components/DeleteModal'
 
@@ -71,7 +71,7 @@ export default function OrdersScreen({ navigation, route }) {
       >
         <Image
           style={styles.orderImage}
-          source={item.restaurant?.logo ? { uri: `${API_BASE_URL}/${item.restaurant.logo}` } : restaurantLogo}
+          source={item.restaurant?.logo ? { uri: getImageUrl(item.restaurant.logo) } : restaurantLogo}
         />
         <View style={styles.orderDetailsContainer}>
           <TextSemiBold style={styles.restaurantName}>{restaurantName}</TextSemiBold>

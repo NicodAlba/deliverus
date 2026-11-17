@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 import * as mime from 'react-native-mime-types'
-import { API_BASE_URL } from '@env'
+import { getImageUrl } from './ImageUrl'
 
 const getPlatform = () => Platform?.OS ?? 'web'
 
@@ -86,7 +86,7 @@ const prepareEntityImages = (entity, imagePropertyNames) => {
   const entityCopy = { ...entity }
   imagePropertyNames.forEach(impagePropertyName => {
     if (entityCopy[impagePropertyName]) {
-      entityCopy[impagePropertyName] = { assets: [{ uri: `${API_BASE_URL}/${entityCopy[impagePropertyName]}` }] }
+      entityCopy[impagePropertyName] = { assets: [{ uri: getImageUrl(entityCopy[impagePropertyName]) }] }
     }
   })
 
