@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -65,7 +66,7 @@ module.exports = {
   },
   copyFiles: () => {
     const originDir = 'public/example_assets/'
-    const destinationDir = process.env.RESTAURANTS_FOLDER + '/'
+    const destinationDir = path.resolve(process.env.UPLOAD_ROOT || '.', process.env.RESTAURANTS_FOLDER) + '/'
     if (!fs.existsSync(destinationDir)) {
       fs.mkdirSync(destinationDir, { recursive: true })
     }

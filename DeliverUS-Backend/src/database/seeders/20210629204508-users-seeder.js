@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const salt = bcrypt.genSaltSync(5)
 const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -43,16 +44,12 @@ module.exports = {
   },
   copyFiles: () => {
     const originDir = 'public/example_assets/'
-    const destinationDir = process.env.AVATARS_FOLDER + '/'
+    const destinationDir = path.resolve(process.env.UPLOAD_ROOT || '.', process.env.AVATARS_FOLDER) + '/'
     if (!fs.existsSync(destinationDir)) {
       fs.mkdirSync(destinationDir, { recursive: true })
     }
 
-    fs.copyFile(originDir + 'maleAvatar.png', destinationDir + 'maleAvatar.png', (err) => {
-      if (err) throw err
-    })
-    fs.copyFile(originDir + 'femaleAvatar.png', destinationDir + 'femaleAvatar.png', (err) => {
-      if (err) throw err
-    })
+    fs.copyFileSync(originDir + 'maleAvatar.png', destinationDir + 'maleAvatar.png')
+    fs.copyFileSync(originDir + 'femaleAvatar.png', destinationDir + 'femaleAvatar.png')
   }
 }

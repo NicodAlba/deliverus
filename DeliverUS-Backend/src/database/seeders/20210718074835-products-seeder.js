@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -222,15 +223,13 @@ module.exports = {
 
   copyFiles: () => {
     const originDir = 'public/example_assets/'
-    const destinationDir = process.env.PRODUCTS_FOLDER + '/'
+    const destinationDir = path.resolve(process.env.UPLOAD_ROOT || '.', process.env.PRODUCTS_FOLDER) + '/'
     if (!fs.existsSync(destinationDir)) {
       fs.mkdirSync(destinationDir, { recursive: true })
     }
     const productsFilenames = ['aceitunas.jpeg', 'agua.png', 'applePie.jpeg', 'burritos.jpeg', 'cafe.jpeg', 'cerveza.jpeg', 'chocolateCake.jpeg', 'chocolateIceCream.jpeg', 'churros.jpeg', 'cola.jpeg', 'ensaladilla.jpeg', 'femaleAvatar.png', 'grilledTuna.jpeg', 'logo.jpeg', 'maleAvatar.png', 'montaditoChocolate.png', 'montaditoJamon.jpeg', 'montaditoSalmon.jpeg', 'salchichon.jpeg', 'steak.jpeg']
     productsFilenames.forEach(productFilename => {
-      fs.copyFile(originDir + productFilename, destinationDir + productFilename, (err) => {
-        if (err) throw err
-      })
+      fs.copyFileSync(originDir + productFilename, destinationDir + productFilename)
     })
   },
   createNProducts: (numProducts, restaurantId) => {

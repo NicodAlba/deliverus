@@ -4,15 +4,22 @@ import loadRoutes from './routes/index.js'
 import { initPassport } from './config/passport.js'
 import { initSequelize, disconnectSequelize } from './config/sequelize.js'
 import loadGlobalMiddlewares from './middlewares/GlobalMiddlewaresLoader.js'
+import loadWebApps from './webApps.js'
 
 const initializeApp = async () => {
   dotenv.config()
   const app = express()
   loadGlobalMiddlewares(app)
-  loadRoutes(app)
+  const api = express.Router()
+  await loadRoutes(api)
+  app.use('/api', api)
+  app.use(api)
   initPassport()
   app.connection = await initializeDatabase()
-  await postInitializeDatabase(app)
+  loadWebApps(app)
+  app.use((error, req, res, next) => {
+    res.status(error.status === 413 ? 413 : 400).json({ errors: [{ msg: 'Invalid request.' }] })
+  })
   return app
 }
 
@@ -20,24 +27,20 @@ const initializeServer = async (enableConsoleLog = false) => {
   controlConsoleLog(enableConsoleLog)
   try {
     const app = await initializeApp()
-    const port = process.env.APP_PORT || 3000
-    const server = await app.listen(port)
+    const port = process.env.PORT || process.env.APP_PORT || 3000
+    const server = await new Promise((resolve, reject) => {
+      const listener = app.listen(port, process.env.HOST || '0.0.0.0', () => resolve(listener))
+      listener.on('error', reject)
+    })
     console.log('DeliverUS listening at http://localhost:' + server.address().port)
     return { server, app }
   } catch (error) {
-    console.error(error)
+    throw new Error('DeliverUS startup failed. Check database connectivity and server configuration.', { cause: error })
   }
 }
 
 const initializeDatabase = async () => {
-  let connection
-  try {
-    connection = await initSequelize()
-    console.log('INFO - Relational/MariaDB/Sequelize technology connected.')
-  } catch (error) {
-    console.error(error)
-  }
-  return connection
+  return initSequelize()
 }
 
 const disconnectDatabase = async (app) => {
@@ -58,10 +61,6 @@ const controlConsoleLog = (enable) => {
   } else {
     console.log = global.originalConsoleLog || console.log
   }
-}
-
-const postInitializeDatabase = async (app) => {
-  // To be used for future requirements
 }
 
 export { initializeApp, disconnectDatabase, initializeServer }
