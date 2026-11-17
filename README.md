@@ -58,7 +58,7 @@ npx expo start --web --localhost --port 8082
 
 Abre Customer en `http://localhost:8081` y Owner en `http://localhost:8082`. Para exportar cualquiera de las dos aplicaciones web, ejecuta `npx expo export -p web` en su carpeta.
 
-| Cuenta de prueba local | Correo | Contraseña |
+| Cuenta de ejemplo | Correo | Contraseña |
 | --- | --- | --- |
 | Cliente | `customer1@customer.com` | `secret` |
 | Propietario | `owner1@owner.com` | `secret` |
@@ -80,6 +80,10 @@ Vuelve a sembrar esa base antes de una demostración manual para restaurar los d
 - Las cuentas y perfiles de la demo estática son fijos. Cada perfil del navegador tiene su propio estado.
 - Owner incluye una vista de pedidos por restaurante con preparación, envío y entrega. El panel adicional sigue siendo provisional.
 - La demo pública guarda los cambios en el navegador. La aplicación con base de datos compartida requiere el arranque local indicado arriba.
+
+## Comprobaciones
+
+El backend pasó 213 pruebas E2E con MariaDB local desechable. En la demo pública se comprobaron catálogo y filtros, pedido y edición tras recargar, cancelación, edición de producto con imagen y avance de pedidos desde Owner. También se revisaron móvil, escritorio, enlaces entre apps y restauración del estado local.
 
 ## Créditos y licencia
 

@@ -16,6 +16,7 @@ import { prepareEntityImages } from '../../api/helpers/FileUploadHelper'
 import { buildInitialValues } from '../Helper'
 
 export default function ProfileScreen () {
+  const isStatic = process.env.EXPO_PUBLIC_STATIC_DEMO === 'true'
   const { loggedInUser, signOut, updateProfile } = useContext(AuthorizationContext)
   const [backendErrors, setBackendErrors] = useState()
 
@@ -105,7 +106,7 @@ export default function ProfileScreen () {
               <View style={{ alignItems: 'center' }}>
                 <View style={styles.container}>
                   <View style={{ flexDirection: 'row', marginTop: 30 }}>
-                    <TouchableOpacity onPress={() =>
+                    <TouchableOpacity disabled={isStatic} onPress={() =>
                       pickImage(
                         async result => {
                           await setFieldValue('avatar', result)
@@ -114,7 +115,7 @@ export default function ProfileScreen () {
                     }>
                       <Image style={styles.image} source={values.avatar ? { uri: values.avatar.assets[0].uri } : maleAvatar} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
+                    <TouchableOpacity disabled={isStatic} onPress={() => {
                       pickImage(
                         async result => {
                           await setFieldValue('avatar', result)
@@ -127,26 +128,31 @@ export default function ProfileScreen () {
                     </TouchableOpacity>
                   </View>
                   <InputItem
+                    editable={!isStatic}
                     name='firstName'
                     label='First name'
                     textContentType='name'
                   />
                   <InputItem
+                    editable={!isStatic}
                     name='lastName'
                     label='Last name'
                     textContentType='familyName'
                   />
                   <InputItem
+                    editable={!isStatic}
                     name='phone'
                     label='Phone'
                     textContentType='telephoneNumber'
                   />
                   <InputItem
+                    editable={!isStatic}
                     name='address'
                     label='Address'
                     textContentType='fullStreetAddress'
                   />
                   <InputItem
+                    editable={!isStatic}
                     name='postalCode'
                     label='Postal Code'
                     textContentType='postalCode'
@@ -155,6 +161,7 @@ export default function ProfileScreen () {
                     backendErrors.map((error, index) => <TextError key={index}>{error.param}-{error.msg}</TextError>)
                   }
 
+                  {isStatic ? <TextRegular>Perfil fijo de demostración</TextRegular> : (
                   <Pressable disabled={!isValid} onPress={handleSubmit}
                     style={({ pressed }) => [
                       {
@@ -171,6 +178,7 @@ export default function ProfileScreen () {
                   >
                     <TextRegular textStyle={styles.text}>Save</TextRegular>
                   </Pressable>
+                  )}
                   <Pressable onPress={() => signOutAndNavigate()}
                     style={({ pressed }) => [
                       {
