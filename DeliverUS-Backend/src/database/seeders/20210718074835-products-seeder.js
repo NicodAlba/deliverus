@@ -226,7 +226,7 @@ module.exports = {
     if (!fs.existsSync(destinationDir)) {
       fs.mkdirSync(destinationDir, { recursive: true })
     }
-    const productsFilenames = ['aceitunas.jpeg', 'agua.png', 'applePie.jpeg', 'burritos.jpeg', 'cafe.jpeg', 'cerveza.jpeg', 'chocolateCake.jpeg', 'chocolateIceCream.jpeg', 'churros.jpeg', 'cola.jpeg', 'ensaladilla.jpeg', 'femaleAvatar.png', 'grilledTuna.jpeg', 'heroImage.jpg', 'logo.jpeg', 'maleAvatar.png', 'montaditoChocolate.png', 'montaditoJamon.jpeg', 'montaditoSalmon.jpeg', 'salchichon.jpeg', 'steak.jpeg']
+    const productsFilenames = ['aceitunas.jpeg', 'agua.png', 'applePie.jpeg', 'burritos.jpeg', 'cafe.jpeg', 'cerveza.jpeg', 'chocolateCake.jpeg', 'chocolateIceCream.jpeg', 'churros.jpeg', 'cola.jpeg', 'ensaladilla.jpeg', 'femaleAvatar.png', 'grilledTuna.jpeg', 'logo.jpeg', 'maleAvatar.png', 'montaditoChocolate.png', 'montaditoJamon.jpeg', 'montaditoSalmon.jpeg', 'salchichon.jpeg', 'steak.jpeg']
     productsFilenames.forEach(productFilename => {
       fs.copyFile(originDir + productFilename, destinationDir + productFilename, (err) => {
         if (err) throw err
